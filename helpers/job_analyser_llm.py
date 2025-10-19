@@ -3,7 +3,7 @@ from strands.models.openai import OpenAIModel
 import os
 
 class JobAnalyser:
-    """Generates 10 alternative car search queries based on user input."""
+    """Class to generate job analysis based on user resume and job description using LLM."""
     TEMPERATURE = 0.7
     MAX_TOKENS = 2000
     MODEL_ID = "gpt-4o"
@@ -49,6 +49,7 @@ class JobAnalyser:
             print(f"Failed to load prompt: {e}")
 
     def _format_user_prompt(self) -> str:
+        """Format the user prompt with user resume and job description."""
         user_prompt = self._load_prompt(self._user_prompt_path)
         user_prompt = user_prompt % {
             "user_resume": self._user_resume,
@@ -57,7 +58,7 @@ class JobAnalyser:
         return user_prompt
 
     def generate_analysis(self) -> str:
-        """Generate 10 alternative car search queries based on user input."""
+        """Generate job analysis using the LLM"""
         try:
             llm_response = self._agent(self._user_prompt)
 
@@ -71,9 +72,3 @@ if __name__ == '__main__':
     jobanalyser = JobAnalyser(user_resume='Data Scientist with 5 years of experience in Python, Machine Learning, and Data Analysis.',
                               job_description='Looking for a Data Scientist skilled in Python, Machine Learning, and Data Visualization.')
     response =jobanalyser.generate_analysis()
-    print(response)
-    # query = "Kona under 30K"
-    # generated_sections = section_generator.generate_sections(query)
-    # print("Generated Sections:")
-    # for alt in generated_sections:
-    #     print(f"- {alt}")

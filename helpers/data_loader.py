@@ -116,10 +116,3 @@ Description: {row['cleaned_content']}
         records = df.to_dict(orient='records')
         validated_records = self._validate_records(records)
         return validated_records
-
-
-@st.cache_data(show_spinner=False)
-def load_data(file_path='data/ads-50k.json'):
-    """Load and process data with caching for Streamlit."""
-    loader = DataLoader(file_path)
-    return loader.get_processed_data()

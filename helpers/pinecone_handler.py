@@ -3,15 +3,18 @@ from pinecone import Pinecone
 import pandas as pd
 from helpers.data_loader import DataLoader
 import os
-import logging
 import time
 
 
-
 class PineconeHandler:
+    """Handler for Pinecone operations including index creation, data upsertion, and searching."""
     PINECONE_API_KEY = os.environ.get('PINECONE_API_KEY')
 
-    def __init__(self, index_name: str, data_path: str | None = None, cloud: str = "aws", region: str = "us-east-1",
+    def __init__(self,
+                 index_name: str,
+                 data_path: str | None = None,
+                 cloud: str = "aws",
+                 region: str = "us-east-1",
                  model: str = "llama-text-embed-v2"):
 
         self.data_path = data_path
@@ -26,7 +29,8 @@ class PineconeHandler:
             self.records = self.data_loader.get_data_for_insertion()
         self.index = None
 
-    def create_index(self, field_map):
+    def create_index(self, field_map: dict):
+        """Create a Pinecone index with the specified field mapping for embeddings."""
         if not self.pc.has_index(self.index_name):
             self.pc.create_index_for_model(
                 name=self.index_name,
@@ -39,20 +43,20 @@ class PineconeHandler:
             )
         self.index = self.pc.Index(self.index_name)
 
-    def upsert_records(self, namespace, batch_size=20):
-        logger = logging.getLogger(__name__)
-
+    def upsert_records(self, namespace: str, batch_size: int = 20):
+        """Upsert records into the Pinecone index in batches."""
         if self.index is None:
             self.index = self.pc.Index(self.index_name)
 
         if not self.records:
-            logger.warning("No records to upsert")
+            print("No records to upsert")
             return
-        self.records = self.records[10000:]
+        self.records = self.records
         total_records = len(self.records)
         total_batches = (total_records - 1) // batch_size + 1
-        logger.info(f"Upserting {total_records} records in {total_batches} batches")
+        print(f"Upserting {total_records} records in {total_batches} batches")
 
+        # Upsert in batches to avoid rate limiting
         for i in range(0, total_records, batch_size):
             batch = self.records[i:i + batch_size]
             batch_num = i // batch_size + 1
@@ -61,18 +65,20 @@ class PineconeHandler:
 
             try:
                 self.index.upsert_records(namespace, batch)
-                logger.info(f"Successfully upserted batch {batch_num}")
+                print(f"Successfully upserted batch {batch_num}")
             except Exception as e:
-                logger.error(f"Error upserting batch {batch_num}: {str(e)}")
+                print(f"Error upserting batch {batch_num}: {str(e)}")
                 raise
 
     @staticmethod
-    def convert_search_results_to_dataframe(search_results):
+    def convert_search_results_to_dataframe(search_results) -> pd.DataFrame:
         """Convert Pinecone search results to a pandas DataFrame."""
         # Extract all records
         records = []
 
+        # Iterate through search result
         for item in search_results.result.hits:
+
             # Start with the _id and _score
             record = {
                 'id': item['_id'],
@@ -88,7 +94,13 @@ class PineconeHandler:
 
         # Create DataFrame
         return pd.DataFrame(records)
-    def search(self, namespace, query, top_k=10):
+
+    def search(self,
+               namespace: str,
+               query: str,
+               top_k: int = 10,
+               filter_dict: dict = None) -> pd.DataFrame:
+        """Search the Pinecone index with the given query and return results as a DataFrame."""
         if self.index is None:
             self.index = self.pc.Index(self.index_name)
         search_results = self.index.search(
@@ -97,7 +109,8 @@ class PineconeHandler:
                 "top_k": top_k,
                 "inputs": {
                     'text': query
-                }
+                },
+                "filter": filter_dict
             }
         )
 
@@ -110,8 +123,7 @@ if __name__ == '__main__':
         data_path='data/ads-50k.json',
         index_name='seek-ads'
     )
-    # handler.create_index(field_map={"text": "embed_text"})
-    # handler.upsert_records(namespace="job-description-namespace")
+
     results = handler.search(
         namespace="job-description-namespace",
         query="Data Scientist jobs in Melbourne that uses Python and machine learning"
