@@ -1,0 +1,29 @@
+You will receive two sections of text:
+
+[Resume]
+%(user_resume)s
+
+[Job Description]
+%(job_description)s
+
+Please respond strictly in the following structured format:
+
+---
+
+✅ OVERALL FIT SUMMARY
+(Provide a short paragraph summarizing how well you match the job. Mention the overall impression and fit level, e.g., "Strong fit," "Partial fit," or "Needs improvement.". Please return new line after OVERALL FIT SUMMARY)
+
+---
+
+🎯 WHY YOU ARE A GOOD MATCH
+(List 4–6 bullet points explaining *specific strengths and alignments* between the resume and the job description. Reference concrete examples from the resume — skills, experience, education, or achievements.)
+
+---
+
+⚠️ MISSING OR WEAK AREAS
+(List 3–5 bullet points highlighting *what’s missing or needs improvement* in your resume to be a stronger fit for the job. These could include missing keywords, specific tools, certifications, or experience gaps.)
+
+---
+
+🛠 RECOMMENDATIONS
+(Provide 2–3 concise, actionable suggestions for improving the resume or preparing for the interview. Keep it practical and realistic.)
