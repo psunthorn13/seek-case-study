@@ -6,7 +6,7 @@ if __name__ == '__main__':
         index_name='seek-ads'
     )
     # Create the Pinecone index with specified field mapping
-    handler.create_index(field_map={"text": "embed_text"})
+    # handler.create_index(field_map={"text": "embed_text"})
 
     # Upsert records into the Pinecone index
     handler.upsert_records(namespace="job-description-namespace")
